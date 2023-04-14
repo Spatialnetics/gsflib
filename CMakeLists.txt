@@ -14,6 +14,12 @@ add_library(gsflib)
 file(GLOB sources LIST_DIRECTORIES false source/gsf/*.c source/gsf/*.h)
 target_sources(gsflib PRIVATE ${sources})
 
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    # GSFLib uses ancient, explicitly 64-bit file APIs and needs this define to work
+    # on modern GCC build systems.
+    target_compile_definitions(gsflib PRIVATE _LARGEFILE64_SOURCE)
+endif()
+
 # We don't yet have an install step, but for those using this repo as a submodule,
 # we can add the source directory to the include path for anyone linking against
 # the lib.
