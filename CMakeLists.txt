@@ -20,6 +20,22 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_definitions(gsflib PRIVATE _LARGEFILE64_SOURCE)
 endif()
 
+if(WIN32)
+    # GSFLib isn't exactly at home on Windows and needs some help adapting to the
+    # environment.
+    target_compile_definitions(gsflib
+            PUBLIC
+            HAVE_STRUCT_TIMESPEC
+            PRIVATE
+            F_OK=0
+            __WINDOWS__
+    )
+
+    # Link against Winsock2
+    find_library(ws2_32_LIBRARY_PATH ws2_32 REQUIRED)
+    target_link_libraries(gsflib PRIVATE ${ws2_32_LIBRARY_PATH})
+endif()
+
 # We don't yet have an install step, but for those using this repo as a submodule,
 # we can add the source directory to the include path for anyone linking against
 # the lib.
