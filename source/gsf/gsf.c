@@ -170,7 +170,10 @@
 #if (defined _WIN32) && (defined _MSC_VER)
 #define fseek(x, y, z) _fseeki64((x), (y), (z))
 #define ftell(x)   _ftelli64((x))
-#else  // Linux, MingW, MacOS
+#elif __APPLE__ // macOS
+#define fseek(x, y, z) fseeko((x), (y), (z))
+#define ftell(x)   ftello((x))
+#else  // Linux, MingW
 #undef fopen
 #define fopen(x, y)  fopen64((x), (y))
 #define fseek(x, y, z) fseeko64((x), (y), (z))
@@ -251,6 +254,9 @@ gsfStat (const char *filename, long long *sz)
 #if (defined __WINDOWS__) || (defined __MINGW32__)
     struct _stati64    stbuf;
     rc = _stati64(filename, &stbuf);
+#elif __APPLE__
+    struct stat      stbuf;
+    rc = stat(filename, &stbuf);
 #else
     struct stat64      stbuf;
     rc = stat64(filename, &stbuf);

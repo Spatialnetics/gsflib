@@ -114,7 +114,10 @@
 #if (defined _WIN32) && (defined _MSC_VER)
 #define fseek(x, y, z) _fseeki64((x), (y), (z))
 #define ftell(x)   _ftelli64((x))
-#else  // Linux, MingW, MacOS
+#elif __APPLE__ // MacOS
+#define fseek(x, y, z) fseeko((x), (y), (z))
+#define ftell(x)   ftello((x))
+#else  // Linux, MingW
 #undef fopen
 #define fopen(x, y)  fopen64((x), (y))
 #define fseek(x, y, z) fseeko64((x), (y), (z))
