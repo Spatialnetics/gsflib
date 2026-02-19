@@ -44,6 +44,17 @@ if(WIN32)
     target_link_libraries(gsflib PRIVATE ${ws2_32_LIBRARY_PATH})
 endif()
 
+# Suppress all warnings.
+#
+# This is an older codebase that does many things that compilers now discourage.
+# Let's suppress the hundreds of resulting warnings until someone is interested in
+# modernizing the code.
+if (MSVC)
+    target_compile_options(gsflib PRIVATE /W0)
+else()
+    target_compile_options(gsflib PRIVATE -w)
+endif()
+
 # We don't yet have an install step, but for those using this repo as a submodule,
 # we can add the source directory to the include path for anyone linking against
 # the lib.
