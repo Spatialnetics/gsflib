@@ -1,9 +1,15 @@
 
 echo $(_InputFile) running under $(_System).
 
+
+%If !%Defined(BITLEVEL)
+	BITLEVEL=
+%Endif
+
+
 PREFIX        = gsf 
-TGT           = lib$(PREFIX).dll
-STATIC_TGT    = lib$(PREFIX).a
+TGT           = lib$(PREFIX)$(BITLEVEL).dll
+STATIC_TGT    = lib$(PREFIX)$(BITLEVEL).a
 CFLAGS        = $(MACROS) -Wall -D_STRICT_ANSI -D_LARGEFILE64_SOURCE
 CPPFLAGS      = $(CFLAGS)
 LFLAGS        = -shared $(LINK_FLAGS)

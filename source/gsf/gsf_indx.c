@@ -134,7 +134,7 @@ static void close_temp_file(int, FILE *);
 static int gsfCreateIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft);
 static int gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft);
 static int is_path(const char *path);
-static void temp_file_name(int type, char *d_name, char *f_name);
+static void temp_file_name(int type, char *d_name, int d_name_size, char *f_name, int f_name_size);
 
 /* JCD: Variables and functions for the index progress callback */
 static GSF_PROGRESS_CALLBACK  gsf_progress_callback = NULL;
@@ -277,7 +277,7 @@ gsfOpenIndex(const char *filename, int handle, GSF_FILE_TABLE *ft)
     }
 
     /* Create the GSF index file name (assuming an extension of .n##) */
-    strcpy(ndx_file, filename);
+    snprintf(ndx_file, sizeof(ndx_file), "%s", filename);
     ndx_file[strlen(ndx_file) - 3] = 'n';
 
     /* Try to open the index file for read. */
@@ -1315,7 +1315,7 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
 
     if (last_record_type != GSF_RECORD_SWATH_BATHYMETRY_PING)
     {
-        data_id.recordID = last_record_type;
+        data_id.recordID = (unsigned int) last_record_type;
         data_id.record_number = last_record_number;
         err = gsfRead(handle, data_id.recordID, &data_id, &records, NULL, 0);
         if (err < 0)
@@ -1453,20 +1453,25 @@ gsfAppendIndexFile(const char *ndx_file, int handle, GSF_FILE_TABLE *ft)
                                 ft->index_data.scale_factor_addr =
                                     (INDEX_REC *) calloc(ft->index_data.number_of_records[0],
                                     sizeof(INDEX_REC));
+                                //  Couldn't calloc the memory for the scale factor addresses.
+                                if (ft->index_data.scale_factor_addr == (INDEX_REC *)NULL)
+                                {
+                                    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                                    return (-1);
+                                }
                             }
                             else
                             {
-                                ft->index_data.scale_factor_addr =
-                                    (INDEX_REC *) realloc(ft->index_data.scale_factor_addr,
+                                INDEX_REC * ir_temp = (INDEX_REC *) realloc(ft->index_data.scale_factor_addr,
                                     ft->index_data.number_of_records[0] * sizeof(INDEX_REC));
-                            }
-
-                            /*  Couldn't calloc the memory for the scale factor addresses.  */
-
-                            if (ft->index_data.scale_factor_addr == NULL)
-                            {
-                                gsfError = GSF_MEMORY_ALLOCATION_FAILED;
-                                return (-1);
+                                if (ir_temp == (INDEX_REC *)NULL)
+                                {
+                                    free(ft->index_data.scale_factor_addr);
+                                    ft->index_data.scale_factor_addr = (INDEX_REC *)NULL;
+                                    gsfError = GSF_MEMORY_ALLOCATION_FAILED;
+                                    return (-1);
+                                }
+                                ft->index_data.scale_factor_addr = ir_temp;
                             }
                         }
                     }
@@ -1974,47 +1979,47 @@ is_path(const char *path)
  ********************************************************************/
 
 static void
-temp_file_name(int type, char *d_name, char *f_name)
+temp_file_name(int type, char *d_name, int d_name_size, char *f_name, int f_name_size)
 {
 
 #if defined(OS2) || defined(WIN32) || defined(WIN64)
 
     if ( (getenv ("TEMP") == NULL) && (getenv ("GSFTMPDIR") == NULL) )
-        strcpy (d_name, ".\\");
+        snprintf (d_name, d_name_size, ".\\");
     else if (getenv ("GSFTMPDIR") != NULL) {
-        strcpy (d_name, getenv ("GSFTMPDIR"));
+        snprintf (d_name, d_name_size, "%s", getenv ("GSFTMPDIR"));
         if (!is_path(d_name))
         {
-            strcpy (d_name, ".\\");
+            snprintf (d_name, d_name_size, ".\\");
         }
     } else {
-        strcpy (d_name, getenv ("TEMP"));
+        snprintf (d_name, d_name_size, "%s", getenv ("TEMP"));
         if (!is_path(d_name))
         {
-            strcpy (d_name, ".\\");
+            snprintf (d_name, d_name_size, ".\\");
         }
     }
 
-    sprintf(f_name, "%s\\%05d%02d.ndx", d_name, _getpid(), type);
+    snprintf(f_name, f_name_size, "%s\\%05d%02d.ndx", d_name, _getpid(), type);
 
 #else
 
     if ( (getenv ("TEMP") == NULL) && (getenv ("GSFTMPDIR") == NULL) )
-        strcpy (d_name, "/tmp");
+        snprintf (d_name, d_name_size, "/tmp");
     else if (getenv ("GSFTMPDIR") != NULL) {
-        strcpy (d_name, getenv ("GSFTMPDIR"));
+        snprintf (d_name, d_name_size, "%s", getenv ("GSFTMPDIR"));
         if (!is_path(d_name))
         {
-            strcpy (d_name, "/tmp");
+            snprintf (d_name, d_name_size, "/tmp");
         }
     } else {
-        strcpy (d_name, getenv ("TEMP"));
+        snprintf (d_name, d_name_size, "%s", getenv ("TEMP"));
         if (!is_path(d_name))
         {
-            strcpy (d_name, "/tmp");
+            snprintf (d_name, d_name_size, "/tmp");
         }
     }
-    sprintf(f_name, "%s/%05d%02d.ndx", d_name, getpid(), type);
+    snprintf(f_name, f_name_size, "%s/%05d%02d.ndx", d_name, getpid(), type);
 
 #endif
 
@@ -2049,7 +2054,7 @@ open_temp_file(int type)
     memset (&dir, 0, sizeof (dir));
     memset (&file, 0, sizeof(file));
 
-    temp_file_name(type, dir, file);
+    temp_file_name(type, dir, sizeof(dir), file, sizeof(file));
 
     if ((fp = fopen(file, "wb+")) == NULL)
     {
@@ -2087,7 +2092,7 @@ close_temp_file(int type, FILE * fp)
     memset (&dir, 0, sizeof(dir));
     memset (&file, 0, sizeof(file));
 
-    temp_file_name(type, dir, file);
+    temp_file_name(type, dir, sizeof(dir), file, sizeof(file));
 
     unlink(file);
 
