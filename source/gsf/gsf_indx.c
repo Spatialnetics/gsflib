@@ -113,6 +113,11 @@
 #if (defined _WIN32) && (defined _MSC_VER)
 #define fseek(x, y, z) _fseeki64((x), (y), (z))
 #define ftell(x)   _ftelli64((x))
+
+#include <io.h>
+#define access _access
+#define F_OK 0
+
 #elif __APPLE__ // MacOS
 #define fseek(x, y, z) fseeko((x), (y), (z))
 #define ftell(x)   ftello((x))

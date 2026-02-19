@@ -32,10 +32,9 @@ if(WIN32)
     # GSFLib isn't exactly at home on Windows and needs some help adapting to the
     # environment.
     target_compile_definitions(gsflib
-            PUBLIC
+        PUBLIC
             HAVE_STRUCT_TIMESPEC
-            PRIVATE
-            F_OK=0
+        PRIVATE
             __WINDOWS__
     )
 
