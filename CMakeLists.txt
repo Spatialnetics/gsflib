@@ -10,6 +10,7 @@ add_library(gsflib)
 target_sources(gsflib PRIVATE
     source/gsf/gsf.c
     source/gsf/gsf.h
+    source/gsf/gsf_compress.c
     source/gsf/gsf_dec.c
     source/gsf/gsf_dec.h
     source/gsf/gsf_enc.c
