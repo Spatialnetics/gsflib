@@ -7,12 +7,19 @@ project(gsflib LANGUAGES C)
 option(BUILD_SHARED_LIBS "Build using shared libraries" ON)
 
 add_library(gsflib)
-
-# Use a glob to find all header and implementation files. Explicitly listing the files
-# is typically preferred, but given that the number of files rarely changes upstream,
-# this is probably good enough.
-file(GLOB sources LIST_DIRECTORIES false source/gsf/*.c source/gsf/*.h)
-target_sources(gsflib PRIVATE ${sources})
+target_sources(gsflib PRIVATE
+    source/gsf/gsf.c
+    source/gsf/gsf.h
+    source/gsf/gsf_dec.c
+    source/gsf/gsf_dec.h
+    source/gsf/gsf_enc.c
+    source/gsf/gsf_enc.h
+    source/gsf/gsf_ft.h
+    source/gsf/gsf_geo.c
+    source/gsf/gsf_indx.c
+    source/gsf/gsf_indx.h
+    source/gsf/gsf_info.c
+)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # GSFLib uses ancient, explicitly 64-bit file APIs and needs this define to work
