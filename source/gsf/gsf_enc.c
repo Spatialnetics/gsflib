@@ -1521,7 +1521,7 @@ gsfEncodeSwathBathymetryPing(unsigned char *sptr, gsfSwathBathyPing *ping, GSF_F
         }
         else
         {
-            ret = EncodeSignedTwoByteArray(p, ping->beam_angle_forward, ping->number_beams, &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY);
+            ret = EncodeTwoByteArray(p, ping->beam_angle_forward, ping->number_beams, &ping->scaleFactors, GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY);
         }
         if (ret <= 0)
         {
@@ -9956,12 +9956,12 @@ int gsfSetDefaultScaleFactor(gsfSwathBathyPing *mb_ping)
                 max_scale_factor = UCHAR_MAX;
                 min_scale_factor = 0;
                 break;
-            case GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY:
+           case GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY:
                 dptr = mb_ping->beam_angle_forward;
                 highest_precision = GSF_BEAM_ANGLE_FORWARD_ASSUMED_HIGHEST_PRECISION;
                 id = GSF_SWATH_BATHY_SUBRECORD_BEAM_ANGLE_FORWARD_ARRAY;
-                max_scale_factor = SHRT_MAX;
-                min_scale_factor = SHRT_MIN;
+                max_scale_factor = USHRT_MAX;
+                min_scale_factor = 0;
                 break;
             case GSF_SWATH_BATHY_SUBRECORD_TVG_ARRAY:
                 dptr = mb_ping->TVG_dB;
