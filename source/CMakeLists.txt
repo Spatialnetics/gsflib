@@ -15,10 +15,12 @@ target_sources(gsflib PRIVATE
     gsf/gsf_info.c
 )
 
+
 if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
-    # GSFLib uses ancient, explicitly 64-bit file APIs and needs this define to work
-    # on modern GCC build systems.
-    target_compile_definitions(gsflib PRIVATE _LARGEFILE64_SOURCE)
+    # Force 64-bit file support when building for
+    if(CMAKE_SIZEOF_VOID_P EQUAL 4)
+        target_compile_definitions(gsflib PRIVATE _FILE_OFFSET_BITS=64)
+    endif()
 
     # For historical reasons, GCC keeps the standard C math functions in a separate
     # library that needs to be explicitly linked.

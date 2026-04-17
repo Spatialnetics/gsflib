@@ -118,14 +118,9 @@
 #define access _access
 #define F_OK 0
 
-#elif __APPLE__ // MacOS
+#else
 #define fseek(x, y, z) fseeko((x), (y), (z))
 #define ftell(x)   ftello((x))
-#else  // Linux, MingW
-#undef fopen
-#define fopen(x, y)  fopen64((x), (y))
-#define fseek(x, y, z) fseeko64((x), (y), (z))
-#define ftell(x)   ftello64((x))
 #endif
 #include <sys/types.h>
 #include <sys/stat.h>
