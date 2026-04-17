@@ -15,7 +15,7 @@ target_sources(gsflib PRIVATE
     gsf/gsf_info.c
 )
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+if(CMAKE_C_COMPILER_ID STREQUAL "GNU")
     # GSFLib uses ancient, explicitly 64-bit file APIs and needs this define to work
     # on modern GCC build systems.
     target_compile_definitions(gsflib PRIVATE _LARGEFILE64_SOURCE)
